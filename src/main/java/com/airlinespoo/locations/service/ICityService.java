@@ -2,14 +2,22 @@ package com.airlinespoo.locations.service;
 
 import com.airlinespoo.locations.model.City;
 
+import java.util.List;
+
 /**
  * Operaciones de negocio para gestionar ciudades.
  */
 public interface ICityService {
 
-    City register(String name);
+    City createCity(String name);
 
-    City rename(int id, String name);
+    City getCity(int id);
 
-    void delete(int id);
+    List<City> listCities();
+
+    City updateCity(int id, String name);
+
+    void deleteCity(int id);
+
+    List<City> searchCitiesByName(String name);
 }

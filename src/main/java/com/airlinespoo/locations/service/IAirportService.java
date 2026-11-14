@@ -10,13 +10,19 @@ import java.util.UUID;
  */
 public interface IAirportService {
 
-    Airport register(String name, int cityId);
+    Airport createAirport(String name, int cityId);
 
-    Airport findById(UUID id);
+    Airport getAirport(UUID id);
 
-    List<Airport> findByCity(int cityId);
+    List<Airport> listAirports();
 
-    Airport rename(UUID id, String name);
+    Airport updateAirport(UUID id, String name, int cityId);
 
-    void delete(UUID id);
+    void deleteAirport(UUID id);
+
+    List<Airport> listAirportsByCity(int cityId);
+
+    List<Airport> searchAirportsByName(String name);
+
+    long countAirportsByCity(int cityId);
 }
