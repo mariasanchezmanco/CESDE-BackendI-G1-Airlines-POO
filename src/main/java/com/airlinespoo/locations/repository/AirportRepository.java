@@ -7,7 +7,6 @@ import com.airlinespoo.core.util.Validator;
 import com.airlinespoo.locations.model.Airport;
 import com.airlinespoo.locations.model.City;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,17 +22,17 @@ public class AirportRepository implements IAirportRepository {
             "SELECT a.AirportId, a.name AS airport_name, a.CityId, c.name AS city_name "
                     + "FROM tblAirports a LEFT JOIN tblCities c ON a.CityId = c.CityId";
 
-    private final DataSource dataSource;
+    private final PostgresConnection database;
 
-    public AirportRepository(DataSource dataSource) {
-        this.dataSource = Validator.requireNotNull(dataSource, "conexión de datos");
+    public AirportRepository(PostgresConnection database) {
+        this.database = Validator.requireNotNull(database, "conexión de datos");
     }
 
     @Override
     public Airport create(Airport airport) {
         Validator.requireNotNull(airport, "aeropuerto");
         String sql = "INSERT INTO tblAirports (AirportId, name, CityId) VALUES (?, ?, ?)";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setObject(1, airport.getId());
             statement.setString(2, airport.getName());
@@ -52,7 +51,7 @@ public class AirportRepository implements IAirportRepository {
     public Optional<Airport> findById(UUID id) {
         Validator.requireNotNull(id, "id del aeropuerto");
         String sql = AIRPORT_SELECT + " WHERE a.AirportId = ?";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setObject(1, id);
             try (ResultSet result = statement.executeQuery()) {
@@ -66,7 +65,7 @@ public class AirportRepository implements IAirportRepository {
     @Override
     public List<Airport> findAll() {
         String sql = AIRPORT_SELECT + " ORDER BY a.name";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet result = statement.executeQuery()) {
             return readAirports(result);
@@ -79,7 +78,7 @@ public class AirportRepository implements IAirportRepository {
     public Airport update(Airport airport) {
         Validator.requireNotNull(airport, "aeropuerto");
         String sql = "UPDATE tblAirports SET name = ?, CityId = ? WHERE AirportId = ?";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, airport.getName());
             statement.setInt(2, airport.getCity().getId());
@@ -100,7 +99,7 @@ public class AirportRepository implements IAirportRepository {
     public boolean deleteById(UUID id) {
         Validator.requireNotNull(id, "id del aeropuerto");
         String sql = "DELETE FROM tblAirports WHERE AirportId = ?";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setObject(1, id);
             return statement.executeUpdate() > 0;
@@ -113,7 +112,7 @@ public class AirportRepository implements IAirportRepository {
     public boolean existsById(UUID id) {
         Validator.requireNotNull(id, "id del aeropuerto");
         String sql = "SELECT 1 FROM tblAirports WHERE AirportId = ?";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setObject(1, id);
             try (ResultSet result = statement.executeQuery()) {
@@ -127,7 +126,7 @@ public class AirportRepository implements IAirportRepository {
     @Override
     public long count() {
         String sql = "SELECT COUNT(*) FROM tblAirports";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet result = statement.executeQuery()) {
             result.next();
@@ -140,7 +139,7 @@ public class AirportRepository implements IAirportRepository {
     @Override
     public List<Airport> listAirportsByCity(int cityId) {
         String sql = AIRPORT_SELECT + " WHERE a.CityId = ? ORDER BY a.name";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, cityId);
             try (ResultSet result = statement.executeQuery()) {
@@ -155,7 +154,7 @@ public class AirportRepository implements IAirportRepository {
     public List<Airport> searchAirportsByName(String name) {
         Validator.requireNotNull(name, "nombre de búsqueda");
         String sql = AIRPORT_SELECT + " WHERE a.name ILIKE ? ESCAPE '!' ORDER BY a.name";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, "%" + escapeLike(name) + "%");
             try (ResultSet result = statement.executeQuery()) {
@@ -169,7 +168,7 @@ public class AirportRepository implements IAirportRepository {
     @Override
     public long countAirportsByCity(int cityId) {
         String sql = "SELECT COUNT(*) FROM tblAirports WHERE CityId = ?";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, cityId);
             try (ResultSet result = statement.executeQuery()) {
@@ -184,7 +183,7 @@ public class AirportRepository implements IAirportRepository {
     @Override
     public boolean existsByCityId(int cityId) {
         String sql = "SELECT 1 FROM tblAirports WHERE CityId = ? LIMIT 1";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, cityId);
             try (ResultSet result = statement.executeQuery()) {

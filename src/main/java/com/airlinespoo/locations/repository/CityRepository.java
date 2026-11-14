@@ -6,7 +6,6 @@ import com.airlinespoo.core.exception.NotFoundException;
 import com.airlinespoo.core.util.Validator;
 import com.airlinespoo.locations.model.City;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,17 +16,17 @@ import java.util.Optional;
 
 public class CityRepository implements ICityRepository {
 
-    private final DataSource dataSource;
+    private final PostgresConnection database;
 
-    public CityRepository(DataSource dataSource) {
-        this.dataSource = Validator.requireNotNull(dataSource, "conexión de datos");
+    public CityRepository(PostgresConnection database) {
+        this.database = Validator.requireNotNull(database, "conexión de datos");
     }
 
     @Override
     public City create(City city) {
         Validator.requireNotNull(city, "ciudad");
         String sql = "INSERT INTO tblCities (CityId, name) VALUES (?, ?)";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, city.getId());
             statement.setString(2, city.getName());
@@ -45,7 +44,7 @@ public class CityRepository implements ICityRepository {
     public Optional<City> findById(Integer id) {
         Validator.requireNotNull(id, "id de la ciudad");
         String sql = "SELECT CityId, name FROM tblCities WHERE CityId = ?";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id);
             try (ResultSet result = statement.executeQuery()) {
@@ -59,7 +58,7 @@ public class CityRepository implements ICityRepository {
     @Override
     public List<City> findAll() {
         String sql = "SELECT CityId, name FROM tblCities ORDER BY name";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet result = statement.executeQuery()) {
             return readCities(result);
@@ -72,7 +71,7 @@ public class CityRepository implements ICityRepository {
     public City update(City city) {
         Validator.requireNotNull(city, "ciudad");
         String sql = "UPDATE tblCities SET name = ? WHERE CityId = ?";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, city.getName());
             statement.setInt(2, city.getId());
@@ -92,7 +91,7 @@ public class CityRepository implements ICityRepository {
     public boolean deleteById(Integer id) {
         Validator.requireNotNull(id, "id de la ciudad");
         String sql = "DELETE FROM tblCities WHERE CityId = ?";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id);
             return statement.executeUpdate() > 0;
@@ -105,7 +104,7 @@ public class CityRepository implements ICityRepository {
     public boolean existsById(Integer id) {
         Validator.requireNotNull(id, "id de la ciudad");
         String sql = "SELECT 1 FROM tblCities WHERE CityId = ?";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id);
             try (ResultSet result = statement.executeQuery()) {
@@ -119,7 +118,7 @@ public class CityRepository implements ICityRepository {
     @Override
     public long count() {
         String sql = "SELECT COUNT(*) FROM tblCities";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet result = statement.executeQuery()) {
             result.next();
@@ -133,7 +132,7 @@ public class CityRepository implements ICityRepository {
     public List<City> searchCitiesByName(String name) {
         Validator.requireNotNull(name, "nombre de búsqueda");
         String sql = "SELECT CityId, name FROM tblCities WHERE name ILIKE ? ESCAPE '!' ORDER BY name";
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection = database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, "%" + escapeLike(name) + "%");
             try (ResultSet result = statement.executeQuery()) {
