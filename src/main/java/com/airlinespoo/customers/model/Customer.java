@@ -1,16 +1,6 @@
 package com.airlinespoo.customers.model;
 
 public class Customer {
-    private static final int MAX_ID_LENGTH = 20;
-    private static final int MAX_NAME_LENGTH = 30;
-    private static final int MAX_TELEPHONE_LENGTH = 15;
-    private static final int MAX_COUNTRY_LENGTH = 20;
-    private static final int MAX_ADDRESS_LENGTH = 40;
-    private static final int MAX_EMAIL_LENGTH = 80;
-
-    private static final String TELEPHONE_REGEX = "\\+?[0-9]+";
-    private static final String EMAIL_REGEX = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
-
     private final String id;
     private String firstName;
     private String lastName;
@@ -20,83 +10,51 @@ public class Customer {
     private String address;
     private String country;
 
-    public Customer(String id, String firstName, String lastName, DocumentType documentType,
+    public Customer(String id, String firstName, String lastname, DocumentType documentType,
                     String telephoneNumber, String country) {
-        this.id = validateRequiredText(id, "El id", MAX_ID_LENGTH);
-        this.firstName = validateRequiredText(firstName, "El nombre", MAX_NAME_LENGTH);
-        this.lastName = validateRequiredText(lastName, "El apellido", MAX_NAME_LENGTH);
-        this.documentType = validateDocumentType(documentType);
-        this.telephoneNumber = validateTelephoneNumber(telephoneNumber);
-        this.country = validateRequiredText(country, "El país", MAX_COUNTRY_LENGTH);
+        this.id = validateID(id);
+        this.firstName = validateName(firstName);
+        this.lastName = validateName(lastname);
+        this.documentType = validateDocument(documentType);
+        this.telephoneNumber = telephoneNumber;
+        this.country = country;
     }
 
-    private String validateRequiredText(String value, String fieldName, int maxLength) {
-        if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException(fieldName + " es obligatorio");
+    private String validateName(String data){
+        int MAX_NAME_LENGTH=30;
+        if ( data == null || data.trim().isEmpty()){
+            throw new IllegalArgumentException("Debe existir nombre o apellido");
         }
-        String normalized = value.trim();
-        if (normalized.length() > maxLength) {
-            throw new IllegalArgumentException(
-                fieldName + " no puede tener más de " + maxLength + " caracteres"
-            );
+        String clearData=data.trim();
+        if(clearData.length() > MAX_NAME_LENGTH){
+            throw new IllegalArgumentException("Nombre y/o apellido no puede ser mayor a 30");
         }
-        return normalized;
-    }
 
-    private DocumentType validateDocumentType(DocumentType documentType) {
-        if (documentType == null) {
-            throw new IllegalArgumentException("El tipo de documento no puede ser nulo");
-        }
-        return documentType;
+        return clearData;
     }
-
-    private String validateTelephoneNumber(String telephoneNumber) {
-        String normalized = validateRequiredText(
-            telephoneNumber, "El número de teléfono", MAX_TELEPHONE_LENGTH
-        );
-        if (!normalized.matches(TELEPHONE_REGEX)) {
-            throw new IllegalArgumentException(
-                "El número de teléfono solo puede contener dígitos y un '+' opcional al inicio"
-            );
+    private DocumentType validateDocument(DocumentType data){
+        if (data == null){
+            throw new IllegalArgumentException("DocumentType no puede ser nulo");
         }
-        return normalized;
+        return data;
     }
-
-    private String validateOptionalAddress(String address) {
-        if (address == null) {
-            return null;
+    private String validateID(String id){
+        int MAX_ID_LENGTH=20;
+        if (id==null || id.trim().isEmpty()){
+            throw new IllegalArgumentException("Id es obligatorio");
         }
-        String normalized = address.trim();
-        if (normalized.isEmpty()) {
-            throw new IllegalArgumentException("La dirección no puede estar vacía");
+        String normalizedId = id.trim();
+        if(normalizedId.length() >MAX_ID_LENGTH){
+            throw new IllegalArgumentException("El id debe tener 20 caracteres");
         }
-        if (normalized.length() > MAX_ADDRESS_LENGTH) {
-            throw new IllegalArgumentException(
-                "La dirección no puede tener más de " + MAX_ADDRESS_LENGTH + " caracteres"
-            );
-        }
-        return normalized;
+        return  normalizedId;
     }
-
-    private String validateOptionalEmail(String email) {
-        if (email == null) {
-            return null;
+    private String validateNull(String data){
+        if(data==null || data.trim().isEmpty()){
+            throw new IllegalArgumentException("");
         }
-        String normalized = email.trim();
-        if (normalized.isEmpty()) {
-            throw new IllegalArgumentException("El correo electrónico no puede estar vacío");
-        }
-        if (normalized.length() > MAX_EMAIL_LENGTH) {
-            throw new IllegalArgumentException(
-                "El correo electrónico no puede tener más de " + MAX_EMAIL_LENGTH + " caracteres"
-            );
-        }
-        if (!normalized.matches(EMAIL_REGEX)) {
-            throw new IllegalArgumentException("El formato del correo electrónico no es válido");
-        }
-        return normalized;
+        return ;
     }
-
     public String getId() {
         return id;
     }
@@ -106,15 +64,15 @@ public class Customer {
     }
 
     public void setFirstName(String firstName) {
-        this.firstName = validateRequiredText(firstName, "El nombre", MAX_NAME_LENGTH);
+        this.firstName = validateName(firstName);
     }
 
     public String getLastName() {
         return lastName;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = validateRequiredText(lastName, "El apellido", MAX_NAME_LENGTH);
+    public void setLastName(String lastname) {
+        this.lastName = validateName(lastname);
     }
 
     public DocumentType getDocumentType() {
@@ -122,7 +80,7 @@ public class Customer {
     }
 
     public void setDocumentType(DocumentType documentType) {
-        this.documentType = validateDocumentType(documentType);
+        this.documentType = documentType;
     }
 
     public String getTelephoneNumber() {
@@ -130,7 +88,7 @@ public class Customer {
     }
 
     public void setTelephoneNumber(String telephoneNumber) {
-        this.telephoneNumber = validateTelephoneNumber(telephoneNumber);
+        this.telephoneNumber = telephoneNumber;
     }
 
     public String getEmail() {
@@ -138,7 +96,7 @@ public class Customer {
     }
 
     public void setEmail(String email) {
-        this.email = validateOptionalEmail(email);
+        this.email = email;
     }
 
     public String getAddress() {
@@ -146,7 +104,7 @@ public class Customer {
     }
 
     public void setAddress(String address) {
-        this.address = validateOptionalAddress(address);
+        this.address = address;
     }
 
     public String getCountry() {
@@ -154,6 +112,8 @@ public class Customer {
     }
 
     public void setCountry(String country) {
-        this.country = validateRequiredText(country, "El país", MAX_COUNTRY_LENGTH);
+        this.country = country;
     }
+
 }
+

@@ -1,20 +1,17 @@
 package com.airlinespoo.customers.model;
+import java.util.Objects;
 
 public class DocumentType {
-    private String id;
+    private final String id;
     private String description;
-
+    //CONSTRUCTOR
     public DocumentType(String id, String description) {
         this.id=validateID(id);
         this.description=validateDescription(description);
     }
-
+    //GET AND SET
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = validateID(id);
     }
 
     public String getDescription() {
@@ -27,10 +24,12 @@ public class DocumentType {
 
     //METODOS
     private String validateID(String id){
+        //Aca se valida si id es nulo o si esta vacio
         if (id==null || id.trim().isEmpty()){
             throw new IllegalArgumentException("Tipo de id es obligatorio");
         }
         String normalizedId = id.trim().toUpperCase();
+        //Se valida que id no contenga mas de 2 caracteres
         if(normalizedId.length() != 2){
             throw new IllegalArgumentException("El tipo de id debe tener 2 caracteres");
         }
@@ -45,5 +44,27 @@ public class DocumentType {
             throw new IllegalArgumentException("La descripcion no puede ser mayor de " + 20);
         }
         return clean;
+    }
+
+    @Override
+    public String toString() {
+        return id + " - " + description;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj){
+            return true;
+        }
+        if (obj==null || getClass() != obj.getClass()){
+            return false;
+        }
+        DocumentType other = (DocumentType) obj;
+        return id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
