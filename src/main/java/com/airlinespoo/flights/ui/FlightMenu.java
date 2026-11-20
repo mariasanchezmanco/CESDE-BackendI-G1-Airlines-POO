@@ -2,9 +2,9 @@ package com.airlinespoo.flights.ui;
 
 import com.airlinespoo.airlines.model.Airline;
 import com.airlinespoo.airlines.service.AirlineService;
-import com.airlinespoo.core.ConsoleInput;
-import com.airlinespoo.core.Menu;
-import com.airlinespoo.core.exception.AirlinesPooException;
+import com.airlinespoo.core.ui.ConsoleInput;
+import com.airlinespoo.core.ui.Menu;
+import com.airlinespoo.core.exception.AirlinesException;
 import com.airlinespoo.core.exception.BusinessRuleException;
 import com.airlinespoo.flights.model.Flight;
 import com.airlinespoo.flights.model.FlightReportRow;
@@ -44,7 +44,7 @@ public class FlightMenu implements Menu {
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return TITLE;
     }
 
@@ -56,7 +56,7 @@ public class FlightMenu implements Menu {
             int option = input.readInt("Elige una opción", EXIT_OPTION, MAX_OPTION);
             try {
                 back = execute(option);
-            } catch (AirlinesPooException e) {
+            } catch (AirlinesException e) {
                 System.out.println("No se pudo completar la operación: " + e.getMessage());
             }
         }
@@ -125,7 +125,7 @@ public class FlightMenu implements Menu {
         int id = input.readInt("Id del vuelo a cancelar", 1, MAX_ID);
         Flight flight = flightService.getFlight(id);
         printFlight(flight);
-        if (input.readYesNo("¿Seguro que deseas cancelar este vuelo?")) {
+        if (input.confirm("¿Seguro que deseas cancelar este vuelo?")) {
             flightService.deleteFlight(id);
             System.out.println("Vuelo cancelado.");
         } else {

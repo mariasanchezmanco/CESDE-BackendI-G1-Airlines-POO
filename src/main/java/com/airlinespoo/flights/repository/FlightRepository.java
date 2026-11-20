@@ -1,6 +1,6 @@
 package com.airlinespoo.flights.repository;
 
-import com.airlinespoo.core.InMemoryRepository;
+import com.airlinespoo.core.repository.InMemoryRepository;
 import com.airlinespoo.flights.model.Flight;
 
 import java.time.LocalDate;
@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class FlightRepository extends InMemoryRepository<Flight, Integer> {
+    @Override protected String entityName() { return "vuelo"; }
 
     /** SELECT ... WHERE FlightName = ? (el código ya viene normalizado). */
     public Optional<Flight> findByFlightName(String flightName) {

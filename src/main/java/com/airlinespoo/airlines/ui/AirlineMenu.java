@@ -1,138 +1,102 @@
 package com.airlinespoo.airlines.ui;
 
 import com.airlinespoo.airlines.model.Airline;
-import com.airlinespoo.airlines.repository.AirlineRepository;
 import com.airlinespoo.airlines.service.AirlineService;
 import com.airlinespoo.core.exception.AirlinesException;
-import com.airlinespoo.core.util.IdGenerator;
-
+import com.airlinespoo.core.ui.ConsoleInput;
+import com.airlinespoo.core.ui.Menu;
 import java.util.List;
-import java.util.Scanner;
 
-public class AirlineMenu {
+/** Menú de aerolíneas. Usa el mismo lector del resto del programa. */
+public class AirlineMenu implements Menu {
 
     private final AirlineService airlineService;
-    private final Scanner scanner;
+    private final ConsoleInput input;
 
-    public AirlineMenu() {
-        // Inicializamos los componentes de manera interna y autónoma para este módulo
-        AirlineRepository repository = new AirlineRepository();
-        IdGenerator idGenerator = new IdGenerator(100, 10); // Arranca en 100 y suma de 10 en 10
-        this.airlineService = new AirlineService(repository, idGenerator);
-        this.scanner = new Scanner(System.in);
+    public AirlineMenu(AirlineService airlineService, ConsoleInput input) {
+        this.airlineService = airlineService;
+        this.input = input;
     }
 
-    public void showMenu() {
-        int option = 0;
-        while (option != 6) {
-            System.out.println("\n========================================");
-            System.out.println("       MENÚ DE GESTIÓN DE AEROLÍNEAS     ");
-            System.out.println("========================================");
-            System.out.println("1. Registrar nueva aerolínea");
-            System.out.println("2. Buscar aerolínea por ID");
-            System.out.println("3. Listar todas las aerolíneas");
+    @Override
+    public String title() {
+        return "Aerolíneas";
+    }
+
+    @Override
+    public void run() {
+        int option;
+        do {
+            System.out.println("\n--- MENÚ DE AEROLÍNEAS ---");
+            System.out.println("1. Registrar aerolínea");
+            System.out.println("2. Buscar por ID");
+            System.out.println("3. Listar aerolíneas");
             System.out.println("4. Renombrar aerolínea");
             System.out.println("5. Eliminar aerolínea");
-            System.out.println("6. Salir al menú principal");
-            System.out.print("Seleccione una opción: ");
+            System.out.println("6. Buscar por nombre");
+            System.out.println("0. Volver al menú principal");
+            option = input.readInt("Seleccione una opción", 0, 6);
 
             try {
-                if (scanner.hasNextInt()) {
-                    option = scanner.nextInt();
-                    scanner.nextLine(); // Limpiar el buffer de entrada
-
-                    switch (option) {
-                        case 1:
-                            registerAirline();
-                            break;
-                        case 2:
-                            findAirlineById();
-                            break;
-                        case 3:
-                            listAllAirlines();
-                            break;
-                        case 4:
-                            renameAirline();
-                            break;
-                        case 5:
-                            deleteAirline();
-                            break;
-                        case 6:
-                            System.out.println("Saliendo del módulo de aerolíneas...");
-                            break;
-                        default:
-                            System.out.println("⚠️ Opción no válida. Intente de nuevo.");
-                    }
-                } else {
-                    System.out.println("⚠️ Por favor, ingrese un número válido.");
-                    scanner.nextLine(); // Limpiar entrada errónea
+                switch (option) {
+                    case 1 -> registerAirline();
+                    case 2 -> findAirlineById();
+                    case 3 -> listAllAirlines();
+                    case 4 -> renameAirline();
+                    case 5 -> deleteAirline();
+                    case 6 -> searchAirlines();
+                    case 0 -> System.out.println("Volviendo al menú principal...");
                 }
-            } catch (AirlinesException e) {
-                System.out.println("❌ Error de negocio: " + e.getMessage());
-            } catch (Exception e) {
-                System.out.println("❌ Ocurrió un error inesperado: " + e.getMessage());
+            } catch (AirlinesException | IllegalArgumentException e) {
+                System.out.println("No se pudo completar: " + e.getMessage());
             }
-        }
+        } while (option != 0);
     }
 
     private void registerAirline() {
-        System.out.print("\nIngrese el nombre de la nueva aerolínea: ");
-        String name = scanner.nextLine();
+        String name = input.readRequiredText("Nombre de la aerolínea");
         Airline created = airlineService.createAirline(name);
-        System.out.println("✅ ¡Aerolínea registrada con éxito! Detalles: " + created);
+        System.out.println("Aerolínea registrada: " + created);
     }
 
     private void findAirlineById() {
-        System.out.print("\nIngrese el ID de la aerolínea a buscar: ");
-        if (scanner.hasNextInt()) {
-            Integer id = scanner.nextInt();
-            scanner.nextLine();
-            Airline airline = airlineService.getAirline(id);
-            System.out.println("🔍 Aerolínea encontrada: " + airline);
-        } else {
-            System.out.println("⚠️ ID inválido.");
-            scanner.nextLine();
-        }
+        int id = input.readInt("ID de la aerolínea", 1, Integer.MAX_VALUE);
+        System.out.println(airlineService.getAirline(id));
     }
 
     private void listAllAirlines() {
-        System.out.println("\n--- LISTADO DE AEROLÍNEAS (Orden alfabético) ---");
         List<Airline> airlines = airlineService.listAirlines();
         if (airlines.isEmpty()) {
-            System.out.println("No hay aerolíneas registradas actualmente.");
+            System.out.println("No hay aerolíneas registradas.");
         } else {
-            for (Airline a : airlines) {
-                System.out.println(" - ID: " + a.getId() + " | Nombre: " + a.getName());
+            for (Airline airline : airlines) {
+                System.out.println(airline.getId() + " - " + airline.getName());
             }
-            System.out.println("Total registradas: " + airlineService.countAirlines());
         }
+        System.out.println("Total: " + airlineService.countAirlines());
     }
 
     private void renameAirline() {
-        System.out.print("\nIngrese el ID de la aerolínea que desea renombrar: ");
-        if (scanner.hasNextInt()) {
-            Integer id = scanner.nextInt();
-            scanner.nextLine();
-            System.out.print("Ingrese el nuevo nombre: ");
-            String newName = scanner.nextLine();
-            Airline updated = airlineService.renameAirline(id, newName);
-            System.out.println("✅ ¡Aerolínea actualizada con éxito! " + updated);
-        } else {
-            System.out.println("⚠️ ID inválido.");
-            scanner.nextLine();
-        }
+        int id = input.readInt("ID que desea renombrar", 1, Integer.MAX_VALUE);
+        String name = input.readRequiredText("Nuevo nombre");
+        System.out.println("Aerolínea actualizada: " + airlineService.renameAirline(id, name));
     }
 
     private void deleteAirline() {
-        System.out.print("\nIngrese el ID de la aerolínea que desea eliminar: ");
-        if (scanner.hasNextInt()) {
-            Integer id = scanner.nextInt();
-            scanner.nextLine();
-            airlineService.deleteAirline(id);
-            System.out.println("🗑️ Aerolínea eliminada correctamente.");
+        int id = input.readInt("ID que desea eliminar", 1, Integer.MAX_VALUE);
+        airlineService.deleteAirline(id);
+        System.out.println("Aerolínea eliminada.");
+    }
+
+    private void searchAirlines() {
+        String text = input.readRequiredText("Nombre o parte del nombre");
+        List<Airline> found = airlineService.searchAirlinesByName(text);
+        if (found.isEmpty()) {
+            System.out.println("No se encontraron aerolíneas.");
         } else {
-            System.out.println("⚠️ ID inválido.");
-            scanner.nextLine();
+            for (Airline airline : found) {
+                System.out.println(airline.getId() + " - " + airline.getName());
+            }
         }
     }
 }

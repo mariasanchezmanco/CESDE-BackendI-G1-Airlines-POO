@@ -1,7 +1,7 @@
 package com.airlinespoo.airlines.service;
 
 import com.airlinespoo.airlines.model.Airline;
-import com.airlinespoo.airlines.repository.AirlineRepository;
+import com.airlinespoo.airlines.repository.IAirlineRepository;
 import com.airlinespoo.core.exception.BusinessRuleException;
 import com.airlinespoo.core.exception.NotFoundException;
 import com.airlinespoo.core.util.IdGenerator;
@@ -10,10 +10,10 @@ import java.util.List;
 
 public class AirlineService {
 
-    private final AirlineRepository airlineRepository;
+    private final IAirlineRepository airlineRepository;
     private final IdGenerator idGenerator;
 
-    public AirlineService(AirlineRepository airlineRepository, IdGenerator idGenerator) {
+    public AirlineService(IAirlineRepository airlineRepository, IdGenerator idGenerator) {
         this.airlineRepository = airlineRepository;
         this.idGenerator = idGenerator;
     }

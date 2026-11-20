@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class AirlineRepository extends InMemoryRepository<Airline, Integer> {
+public class AirlineRepository extends InMemoryRepository<Airline, Integer> implements IAirlineRepository {
 
     @Override
     protected String entityName() {

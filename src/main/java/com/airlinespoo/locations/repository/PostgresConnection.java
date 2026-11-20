@@ -1,16 +1,12 @@
 package com.airlinespoo.locations.repository;
 
+import com.airlinespoo.customers.repository.DatabaseConnection;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/** Mantiene el nombre que usa ubicaciones, pero la conexión real es una sola. */
 public class PostgresConnection {
-
     public Connection getConnection() throws SQLException {
-        String url = "jdbc:postgresql://localhost:5432/AirlinesPOO";
-        String user = "postgresql";
-        String password = "123456";
-
-        return DriverManager.getConnection(url, user, password);
+        return DatabaseConnection.getConnection();
     }
 }

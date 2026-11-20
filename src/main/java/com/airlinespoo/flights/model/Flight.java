@@ -1,8 +1,8 @@
 package com.airlinespoo.flights.model;
 
 import com.airlinespoo.airlines.model.Airline;
-import com.airlinespoo.core.Identifiable;
-import com.airlinespoo.core.Validator;
+import com.airlinespoo.core.model.Identifiable;
+import com.airlinespoo.core.util.Validator;
 import com.airlinespoo.core.exception.ValidationException;
 import com.airlinespoo.locations.model.Airport;
 
@@ -46,7 +46,7 @@ public class Flight implements Identifiable<Integer>, Comparable<Flight> {
     public static String normalizeFlightName(String rawFlightName) {
         Validator.requireText(rawFlightName, FLIGHT_NAME_FIELD);
         String normalized = Validator.normalize(rawFlightName).toUpperCase();
-        Validator.maxLength(normalized, FLIGHT_NAME_FIELD, MAX_FLIGHT_NAME_LENGTH);
+        Validator.requireText(normalized, FLIGHT_NAME_FIELD, MAX_FLIGHT_NAME_LENGTH);
         if (!normalized.matches(FLIGHT_NAME_PATTERN)) {
             throw new ValidationException("El código del vuelo solo puede tener letras y dígitos, sin espacios.");
         }
@@ -97,14 +97,14 @@ public class Flight implements Identifiable<Integer>, Comparable<Flight> {
 
     /** Cambia la aerolínea (obligatoria). */
     public void setAirline(Airline airline) {
-        Validator.requireNonNull(airline, "aerolínea");
+        Validator.requireNotNull(airline, "aerolínea");
         this.airline = airline;
     }
 
     /** Cambia la ruta; salida y llegada son obligatorias y deben ser distintas. */
     public void setRoute(Airport departure, Airport arrival) {
-        Validator.requireNonNull(departure, "aeropuerto de salida");
-        Validator.requireNonNull(arrival, "aeropuerto de llegada");
+        Validator.requireNotNull(departure, "aeropuerto de salida");
+        Validator.requireNotNull(arrival, "aeropuerto de llegada");
         if (departure.equals(arrival)) {
             throw new ValidationException("El aeropuerto de salida y el de llegada deben ser distintos.");
         }
@@ -118,10 +118,10 @@ public class Flight implements Identifiable<Integer>, Comparable<Flight> {
      */
     public void setSchedule(LocalDate departureDate, LocalTime departureTime,
                             LocalDate arrivalDate, LocalTime arrivalTime) {
-        Validator.requireNonNull(departureDate, "fecha de salida");
-        Validator.requireNonNull(departureTime, "hora de salida");
-        Validator.requireNonNull(arrivalDate, "fecha de llegada");
-        Validator.requireNonNull(arrivalTime, "hora de llegada");
+        Validator.requireNotNull(departureDate, "fecha de salida");
+        Validator.requireNotNull(departureTime, "hora de salida");
+        Validator.requireNotNull(arrivalDate, "fecha de llegada");
+        Validator.requireNotNull(arrivalTime, "hora de llegada");
         LocalDateTime departureAt = LocalDateTime.of(departureDate, departureTime);
         LocalDateTime arrivalAt = LocalDateTime.of(arrivalDate, arrivalTime);
         if (!arrivalAt.isAfter(departureAt)) {
@@ -150,7 +150,7 @@ public class Flight implements Identifiable<Integer>, Comparable<Flight> {
 
     /** Indica si el vuelo ya salió respecto del momento dado. */
     public boolean hasDeparted(LocalDateTime now) {
-        Validator.requireNonNull(now, "momento de referencia");
+        Validator.requireNotNull(now, "momento de referencia");
         return !getDepartureDateTime().isAfter(now);
     }
 

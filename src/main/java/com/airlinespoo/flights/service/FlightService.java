@@ -2,8 +2,8 @@ package com.airlinespoo.flights.service;
 
 import com.airlinespoo.airlines.model.Airline;
 import com.airlinespoo.airlines.service.AirlineService;
-import com.airlinespoo.core.IdGenerator;
-import com.airlinespoo.core.Validator;
+import com.airlinespoo.core.util.IdGenerator;
+import com.airlinespoo.core.util.Validator;
 import com.airlinespoo.core.exception.DuplicateException;
 import com.airlinespoo.core.exception.NotFoundException;
 import com.airlinespoo.core.exception.ValidationException;
@@ -114,8 +114,8 @@ public class FlightService {
 
     /** Vuelos cuya salida cae en el rango (inclusive). El inicio no puede ser posterior al fin. */
     public List<Flight> listFlightsBetween(LocalDate start, LocalDate end) {
-        Validator.requireNonNull(start, "fecha de inicio");
-        Validator.requireNonNull(end, "fecha de fin");
+        Validator.requireNotNull(start, "fecha de inicio");
+        Validator.requireNotNull(end, "fecha de fin");
         if (start.isAfter(end)) {
             throw new ValidationException("La fecha de inicio no puede ser posterior a la fecha de fin.");
         }
@@ -173,12 +173,12 @@ public class FlightService {
     // --------------------------------------------------------------- HELPERS
 
     private Airport resolveAirport(Airport airport, String field) {
-        Validator.requireNonNull(airport, field);
+        Validator.requireNotNull(airport, field);
         return locationService.getAirport(airport.getId());
     }
 
     private Airline resolveAirline(Airline airline) {
-        Validator.requireNonNull(airline, "aerolínea");
+        Validator.requireNotNull(airline, "aerolínea");
         return airlineService.getAirline(airline.getId());
     }
 
