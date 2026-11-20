@@ -2,7 +2,7 @@ package com.airlinespoo.customers.model;
 import java.util.Objects;
 
 public class DocumentType {
-    private final String id;
+    private String id;
     private String description;
     //CONSTRUCTOR
     public DocumentType(String id, String description) {
