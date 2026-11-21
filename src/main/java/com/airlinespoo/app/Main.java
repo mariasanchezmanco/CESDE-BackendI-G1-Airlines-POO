@@ -30,59 +30,5 @@ public final class Main {
         System.out.println("Proyecto base listo. El kit base (paquete core) está disponible.");
         System.out.println("Cada módulo se integra en develop mediante Pull Request.");
         // TODO (Módulo 3): ensamblar aquí lector, generadores, repositorios, servicios y menús.
-        CustomerRepository repository = new CustomerRepository();
-
-        DocumentType documentType =
-            new DocumentType("CC", "Cedula de ciudadania");
-
-// CREAR
-        Customer customer = new Customer(
-            "123456",
-            "Juan",
-            "Perez",
-            documentType,
-            "+573001234567",
-            "Colombia"
-        );
-
-        customer.setEmail("juan@gmail.com");
-        customer.setAddress("Calle 10");
-
-        repository.crear(customer);
-
-// BUSCAR
-        Customer encontrado = repository.buscarPorId("123456");
-
-        if (encontrado != null) {
-            System.out.println(encontrado);
-            System.out.println(encontrado.getEmail());
-            System.out.println(encontrado.getCountry());
-            System.out.println(encontrado.getDocumentType());
-        }
-
-// LISTAR
-        List<Customer> customers = repository.ListarTodos();
-
-        for (Customer c : customers) {
-            System.out.println(c);
-        }
-
-// ACTUALIZAR
-        Customer actualizado = new Customer(
-            "123456",
-            "Juan Carlos",
-            "Perez",
-            documentType,
-            "+573001234567",
-            "Colombia"
-        );
-
-        actualizado.setEmail("juancarlos@gmail.com");
-        actualizado.setAddress("Carrera 20");
-
-        repository.actualizar(actualizado);
-
-// ELIMINAR
-        repository.eliminar("123456");
     }
 }

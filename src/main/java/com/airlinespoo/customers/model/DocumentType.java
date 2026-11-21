@@ -1,7 +1,8 @@
 package com.airlinespoo.customers.model;
 import java.util.Objects;
+import com.airlinespoo.core.model.Identifiable;
 
-public class DocumentType {
+public class DocumentType implements Identifiable<String> {
     private String id;
     private String description;
     //CONSTRUCTOR
@@ -10,6 +11,7 @@ public class DocumentType {
         this.description=validateDescription(description);
     }
     //GET AND SET
+    @Override
     public String getId() {
         return id;
     }
@@ -40,8 +42,8 @@ public class DocumentType {
             throw new IllegalArgumentException("La descripcion es obligatoria");
         }
         String clean=description.trim();
-        if (clean.length() > 20){
-            throw new IllegalArgumentException("La descripcion no puede ser mayor de " + 20);
+        if (clean.length() > 30){
+            throw new IllegalArgumentException("La descripcion no puede ser mayor de " + 30);
         }
         return clean;
     }

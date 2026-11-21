@@ -1,12 +1,12 @@
 package com.airlinespoo.customers.model;
-
+import com.airlinespoo.core.model.Identifiable;
 import java.util.Objects;
 
-public class Customer {
+public class Customer implements Identifiable<String>{
     private static final int MAX_MAIL_LENGTH=80;
     private static final int MAX_ADDRES_LENGTH=40;
     private static final String TELEPHONE_REGEX = "\\+?[0-9]+";
-    private static final String MAIL_REGEX="[^@\\s]+@[^@\\\\s]+\\.[^@\\s]+";
+    private static final String MAIL_REGEX="[^@\\s]+@[^@\\s]+\\.[^@\\s]+";
     private static final int MAX_NAME_LENGTH=30;
     private static final int MAX_ID_LENGTH=20;
     private static final int MAX_CEL_NUMBER_LENGTH=15;
@@ -30,6 +30,7 @@ public class Customer {
         this.country = validateCountry(country);
     }
 
+    @Override
     public String getId() {
         return id;
     }
