@@ -2,8 +2,11 @@ package com.airlinespoo.airlines;
 
 import com.airlinespoo.airlines.repository.JdbcAirlineRepository;
 import com.airlinespoo.airlines.service.AirlineService;
+import com.airlinespoo.airlines.service.AirlineSampleData;
+import com.airlinespoo.airlines.ui.MainMenu;
 import com.airlinespoo.airlines.ui.AirlineMenu;
 import com.airlinespoo.core.ui.ConsoleInput;
+import com.airlinespoo.core.ui.Menu;
 import com.airlinespoo.core.util.IdGenerator;
 import com.airlinespoo.customers.repository.CountryRepository;
 import com.airlinespoo.customers.repository.DatabaseConnection;
@@ -20,12 +23,11 @@ import com.airlinespoo.reservations.repository.JdbcReservationRepository;
 import com.airlinespoo.reservations.service.ReservationService;
 import com.airlinespoo.reservations.ui.ReservationMenu;
 import java.sql.*;
+import java.util.List;
 
 /** Ejecutar este main desde IntelliJ. El Main del profesor no se modifica. */
 public class AirlinesApp {
     public static void main(String[] args) {
-        // Para ejecutar con el Main del profesor habría que llamar aquí a AirlinesApp.main(args).
-        // Como no podemos modificar ese archivo, arrancamos directamente desde esta clase.
         try (Connection conn=DatabaseConnection.getConnection()) {
             // No seguimos si PostgreSQL no está disponible o las tablas no existen.
             try(Statement st=conn.createStatement()){
@@ -49,29 +51,28 @@ public class AirlinesApp {
         LocationService locations=new LocationService(airports);
         FlightService flights=new FlightService(new JdbcFlightRepository(airlinesRepo,airportsRepo),locations,airlines,ids("tblflights","flightid",1,1));
         CustomerService customers=new CustomerService();
+        airlines.setFlightChecker(flights::airlineHasFlights);
+        AirlineSampleData.loadIfEmpty(airlines);
         ReservationService reservations=new ReservationService(
             new JdbcReservationRepository(DatabaseConnection::getConnection,customers::getCustomer,flights::getFlight),
             customers,flights,ids("tblreservations","reservationid",1,1),ids("tbldetailsreservation","detailid",1,1));
         CountryService countries=new CountryService(new CountryRepository());
-        while(true){
-            System.out.println("\n=== AIRLINES POO - POSTGRESQL ===");
-            System.out.println("1. Aerolíneas");System.out.println("2. Países");
-            System.out.println("3. Ciudades y aeropuertos");System.out.println("4. Vuelos");
-            System.out.println("5. Clientes");System.out.println("6. Reservas");System.out.println("0. Salir");
-            int option=input.readInt("Selecciona una opción",0,6);
-            try{
-                switch(option){
-                    case 1 -> new AirlineMenu(airlines,input).run();
-                    case 2 -> new CountryMenu(countries,input).run();
-                    case 3 -> new LocationsMenu(input,cities,airports).run();
-                    case 4 -> new FlightMenu(flights,locations,airlines,input).run();
-                    case 5 -> customerMenu(input,customers);
-                    case 6 -> new ReservationMenu(input,reservations,customers,flights).run();
-                    case 0 -> {System.out.println("Hasta luego.");return;}
-                }
-            }catch(RuntimeException e){System.out.println("No se pudo completar: "+e.getMessage());}
-        }
+        Menu customerMenu = new Menu() {
+            @Override public String title() { return "Clientes"; }
+            @Override public void run() { customerMenu(input, customers); }
+        };
+
+        List<Menu> menus = List.of(
+            new AirlineMenu(airlines, input),
+            new CountryMenu(countries, input),
+            new LocationsMenu(input, cities, airports),
+            new FlightMenu(flights, locations, airlines, input),
+            customerMenu,
+            new ReservationMenu(input, reservations, customers, flights)
+        );
+        new MainMenu(input, menus).run();
     }
+
     private static IdGenerator ids(String table,String column,int first,int step){
         IdGenerator gen=new IdGenerator(first,step);
         // El último id almacenado debe tenerse en cuenta después de reiniciar.

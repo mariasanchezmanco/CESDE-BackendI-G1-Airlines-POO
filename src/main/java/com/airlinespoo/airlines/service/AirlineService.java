@@ -7,15 +7,21 @@ import com.airlinespoo.core.exception.NotFoundException;
 import com.airlinespoo.core.util.IdGenerator;
 
 import java.util.List;
+import java.util.function.IntPredicate;
 
 public class AirlineService {
 
     private final IAirlineRepository airlineRepository;
     private final IdGenerator idGenerator;
+    private IntPredicate hasFlights = id -> false;
 
     public AirlineService(IAirlineRepository airlineRepository, IdGenerator idGenerator) {
         this.airlineRepository = airlineRepository;
         this.idGenerator = idGenerator;
+    }
+
+    public void setFlightChecker(IntPredicate hasFlights) {
+        this.hasFlights = java.util.Objects.requireNonNull(hasFlights);
     }
 
     /**
@@ -28,12 +34,10 @@ public class AirlineService {
 
         String normalizedName = name.trim();
 
-        // Validar unicidad por nombre usando BusinessRuleException o la regla correspondiente
         if (airlineRepository.findByName(normalizedName).isPresent()) {
             throw new BusinessRuleException("Ya existe una aerolínea con el nombre: " + normalizedName);
         }
 
-        // Obtener el siguiente id del generador (el método del kit base es next())
         Integer id = idGenerator.next();
 
         Airline airline = new Airline(id, normalizedName);
@@ -69,7 +73,6 @@ public class AirlineService {
 
         String normalizedName = newName.trim();
 
-        // Verificar si el nuevo nombre ya lo tiene otra aerolínea distinta
         airlineRepository.findByName(normalizedName).ifPresent(other -> {
             if (!other.getId().equals(id)) {
                 throw new BusinessRuleException("Ya existe otra aerolínea con el nombre: " + normalizedName);
@@ -87,6 +90,9 @@ public class AirlineService {
     public void deleteAirline(Integer id) {
         if (!airlineRepository.existsById(id)) {
             throw new NotFoundException("aerolínea", id);
+        }
+        if (hasFlights.test(id)) {
+            throw new BusinessRuleException("No se puede eliminar la aerolínea porque tiene vuelos registrados");
         }
         airlineRepository.deleteById(id);
     }
